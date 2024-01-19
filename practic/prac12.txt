@@ -1,0 +1,133 @@
+void addToHead(struct point *list, int x,int y)
+{
+	struct point *PtrIx = (struct point*) malloc(sizeof(struct point));
+	
+	if (PtrIx)
+	{
+		PtrIx->x = x;
+		PtrIx->y = y;
+		PtrIx->next = NULL;
+		
+		if (list == NULL)
+			list = PtrIx;
+		
+		else
+		{
+			PtrIx->next = list;
+			list = PtrIx;
+		}
+	}
+}
+
+//Утечка памяти
+В лист передается копия, а не сам указатель
+Ничего не возращается
+
+--------------------------------------------------------------
+struct point* addToHead(struct point *list, int x,int y)
+{
+	struct point *PtrIx = (struct point*) malloc(sizeof(struct point));
+	if (PtrIx)
+	{
+		PtrIx->x = x;
+		PtrIx->y = y;
+		PtrIx->next = NULL;
+		
+		//это условие работает только с копией
+		if (list == NULL)
+			list = PtrIx;
+		
+		else
+		{
+			PtrIx->next = list;
+			list = PtrIx;
+		}
+		
+		return PtrIx;
+	}
+	
+	return NULL;
+}
+
+В лист передается копия, а не сам указатель
+После работы PtrIx указывает на чужую память	
+----------------------------------------------------------
+
+bool addToHead(struct point **list, int x,int y)
+{
+	struct point *PtrIx = (struct point*) malloc(sizeof(struct point));
+	
+	if (PtrIx)
+	{
+		PtrIx->x = x;
+		PtrIx->y = y;
+		PtrIx->next = NULL;
+
+		if (*list == NULL)
+			*list = PtrIx;
+		else
+		{
+			PtrIx->next = *list;
+			*list = PtrIx;
+		}
+	
+		return true;
+	}
+	
+	return false;
+}
+
+Рабочая функция
+
+------------------------------------------------------------------
+struct point* addToHead(struct point **list, int x,int y)
+{
+	struct point *PtrIx = (struct point*) malloc(sizeof(struct point));
+	
+	if (PtrIx)
+	{
+		PtrIx->x = x;
+		PtrIx->y = y;
+		PtrIx->next = NULL;
+
+		if (*list == NULL)
+			*list = PtrIx;
+		else
+		{
+			PtrIx->next = *list;
+			*list = PtrIx;
+		}
+
+		return PtrIx;
+	}
+	return NULL;
+}
+
+Рабочая
+
+---------------------------------------------------------------------
+ВОПРОС
+Пусть current(рис 8) установлен на элемент, после которого нужно добавить
+PtrIx.
+Для того, чтобы добавить элемент, нужно провести связи между элементами
+в следующем порядке.
+1 PtrIx->next = current->next;
+2 current->next = PtrIx;
+
+	Добавление в хвост корректно
+
+
+ВОПРОС
+Вопрос – как нужно изменить запись вида prsC->Surname чтобы можно было обратиться к полю
+через оператор точка.
+
+struct Persona
+{
+	char [100] Surname;
+	char [100] Name;
+	size_t age;
+	size_t ID;
+};
+struct Persona *prsC = NULL;
+
+(*prsC).Surname

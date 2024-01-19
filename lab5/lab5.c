@@ -1,0 +1,244 @@
+#include <stdio.h> 
+#include <stdlib.h> 
+#include <stdbool.h>
+
+#define SIZE_PATH_FILE 100
+typedef int error_code_t;
+
+error_code_t filingFile(const char* _file)
+{
+    if(NULL == _file)
+        return -2;
+
+    FILE* ptrFile = fopen(_file ,"w");
+    
+    if (ptrFile)
+    {
+        for (int i = 0; i < 255; i++)
+        {
+            fprintf(ptrFile,"%c", i);
+        }
+
+        fclose(ptrFile); //Обязательно закрываем файл
+        return 0;
+    }
+
+    else
+    {
+        printf("Can't open the file, Error in [filingFile]\n");
+        return -1;
+    }
+}
+
+error_code_t fileXor(const char* _fileEncrypt, const char* _fileResult, char _key)
+{
+    if(NULL == _fileEncrypt || NULL == _fileResult)
+        return -2;
+
+    FILE* ptrFile = fopen(_fileEncrypt, "r");
+    FILE* encryptFile = fopen(_fileResult, "w");
+
+    char el;
+    if(ptrFile && encryptFile)//Если указатель не пустой, следовательно файл открыт на чтение, //в противном случае не открыт
+    {
+        while(fscanf(ptrFile, "%c", &el) != -1)//Пока не конец файла
+        {
+            el = el ^ _key;
+            fprintf(encryptFile,"%c", el);
+        }
+
+        fclose(ptrFile); //Обязательно закрываем файл
+        fclose(encryptFile);
+        return 0;
+    }
+
+    else
+    {
+        printf("Can't open the file, Error in [filingFile]\n");
+        return -1;
+    }
+}
+
+error_code_t check_equivalent_file(const char* _firstFilePath, const char* _secondFilePath)
+{
+    FILE* File1 = fopen(_firstFilePath, "r");
+    FILE* File2 = fopen(_secondFilePath, "r");
+    
+    if(File1 && File2)//Если указатель не пустой, следовательно файл открыт на чтение,//в противном случае не открыт
+    {
+        char simbol_text_one, simbol_text_two;
+
+        error_code_t fileRead1 = fscanf(File1, "%c", &simbol_text_one);
+        error_code_t fileRead2 = fscanf(File2, "%c", &simbol_text_two); 
+ 
+        while((fileRead1 != -1) && (fileRead2 != -1))//Пока не конец файла
+        {
+            if (simbol_text_one != simbol_text_two)
+            {
+                break;
+            }
+
+            fileRead1 = fscanf(File1, "%c", &simbol_text_one);
+            fileRead2 = fscanf(File2, "%c", &simbol_text_two);
+        }
+        
+        fclose(File1); //Обязательно закрываем файл
+        fclose(File2);
+        
+        if (fileRead1 == -1 && fileRead2 == -1)
+        {
+            return 1;
+        }
+        else
+            return 0;
+    }
+    
+    else
+    {
+        printf("Can't open the file, Error in [equal]\n");
+        return -1;
+    }
+
+}
+
+int main()
+{
+    printf("------------------------------\n");
+    printf("1)+ 2)+\n");
+
+    {
+        char pathFile1[SIZE_PATH_FILE] = {"file1.txt"}; 
+        char pathFile2[SIZE_PATH_FILE] = {"file2.txt"}; 
+        char pathFile3[SIZE_PATH_FILE] = {"file3.txt"}; 
+
+        printf("Test 1, filing filing\n");
+        //filingFile(pathFile1);
+
+        char key = '+';
+        fileXor(pathFile1, pathFile2, key);
+        fileXor(pathFile2, pathFile3, key);
+        
+        bool flag = check_equivalent_file(pathFile1, pathFile3);
+        if (flag)
+            printf("Ok\n");
+        else
+            printf("Not equal");
+
+    }
+    
+    printf("------------------------------\n");
+    printf("1)- 2)-\n");
+
+    {
+        char pathFile1[SIZE_PATH_FILE] = {"./test/not1.txt"}; 
+        char pathFile2[SIZE_PATH_FILE] = {"./test/not1.txt"}; 
+        char pathFile3[SIZE_PATH_FILE] = {"file3.txt"}; 
+
+        printf("Test 2, not filing\n");
+
+        char key = '+';
+        if(!fileXor(pathFile1, pathFile2, key) && !fileXor(pathFile2, pathFile3, key))
+        {
+            bool flag = check_equivalent_file(pathFile1, pathFile3);
+
+            if (flag)
+                printf("Ok\n");
+            else
+                printf("Not equal");
+        }
+
+        else
+            printf("Incorrect data\n");
+    }
+
+    printf("------------------------------\n");
+    printf("1)+ 2)-\n");
+
+    {
+        char pathFile1[SIZE_PATH_FILE] = {"file1.txt"}; 
+        char pathFile2[SIZE_PATH_FILE] = {"./test/not2.txt"}; 
+        char pathFile3[SIZE_PATH_FILE] = {"file3.txt"}; 
+
+        char key = '+';
+        if(!fileXor(pathFile1, pathFile2, key) && !fileXor(pathFile2, pathFile3, key))
+        {
+            bool flag = check_equivalent_file(pathFile1, pathFile3);
+            if (flag)
+                printf("Ok\n");
+            else
+                printf("Not equal");
+        }
+
+        else
+            printf("Incorrect data\n");
+    }
+
+    printf("------------------------------\n");
+    printf("1)- 2)+\n");
+
+    {
+        char pathFile1[SIZE_PATH_FILE] = {"file1.txt"}; 
+        char pathFile2[SIZE_PATH_FILE] = {"./test/not2.txt"}; 
+        char pathFile3[SIZE_PATH_FILE] = {"file3.txt"}; 
+
+        char key = '+';
+        if(!fileXor(pathFile1, pathFile2, key) && !fileXor(pathFile2, pathFile3, key))
+        {
+            bool flag = check_equivalent_file(pathFile1, pathFile3);
+            if (flag)
+                printf("Ok\n");
+            else
+                printf("Not equal");
+        }
+
+        else
+            printf("Incorrect data\n");
+    }
+
+    printf("------------------------------\n");
+    printf("different len result file \n");
+
+    {
+        char pathFile1[SIZE_PATH_FILE] = {"file1.txt"}; 
+        char pathFile2[SIZE_PATH_FILE] = {"file2.txt"}; 
+        char pathFile3[SIZE_PATH_FILE] = {"file3.txt"};
+        char pathFile4[SIZE_PATH_FILE] = {"file4.txt"}; 
+
+        FILE* File1 = fopen(pathFile3, "r");
+        FILE* File2 = fopen(pathFile4, "w");
+        
+        if (File1 && File2)
+        {
+            char el;
+            while(fscanf(File1, "%c", &el)!=-1)//Пока не конец файла
+            {
+                fprintf(File2, "%c", el);
+            }
+
+            for (int i = 0; i < 255; i++)
+            {
+                fprintf(File2,"%c", i);
+            }
+            
+            fclose(File1); //Обязательно закрываем файл
+            fclose(File2);
+        }
+
+        else{
+            printf("Can't open the file, Error in [filingFile]\n");
+        }
+
+
+        bool flag = check_equivalent_file(pathFile1, pathFile4);
+        if (flag)
+            printf("Ok\n");
+    
+        else{
+            printf("Not equal\n");
+        }
+        
+    }
+
+
+    return 0;
+}
